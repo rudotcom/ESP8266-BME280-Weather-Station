@@ -2,44 +2,35 @@ P = nil
 T = nil
 H = nil
 
-temperature = nil
-pressure = nil
-humidity = nil
-
--- See https://ubidots.com/docs/api/#send-values for YOUR URLs
-temp_url = "http://your-temperature-url-and-token-here"
-pres_url = "http://your-pressure-url-and-token-here"
-humi_url = "http://your-humidity-url-and-token-here"
+serv_url = "http://192.168.8.1/rec.php?sid="
 
 
 function goto_sleep()
     -- Puts the ESP8266 into DeepSleep mode
-    node.dsleep(1800000000) -- 30 minutes
+    node.dsleep(600000000,2) -- 10 minutes
 end
 
 
 function post_humi()
-    http.post(humi_url, 'Content-Type: application/json\r\n', humidity, function() node.task.post(goto_sleep) end)
+    sid = 3; -- mysql humidity id
+    http.get(serv_url..sid..'&value='..H, nil, function() node.task.post(goto_sleep) end)
 end
 
 
 function post_pres()
-    http.post(pres_url, 'Content-Type: application/json\r\n', pressure, function() node.task.post(post_humi) end)
+    sid = 2; -- mysql pressure id
+    http.get(serv_url..sid..'&value='..P, nil, function() node.task.post(post_humi) end)
 end
 
 
 function start_posting()
-    http.post(temp_url, 'Content-Type: application/json\r\n', temperature, function() node.task.post(post_pres) end)
+    sid = 1; -- mysql temperature id
+    http.get(serv_url..sid..'&value='..T, nil, function() node.task.post(post_pres) end)
 end
 
 
 function connected()
     -- Managed to connect to WiFi Network
-    -- Send data to Ubidots
-    temperature = string.format('{"value": "%.2f"}', T)
-    pressure = string.format('{"value": "%.1f"}', P)
-    humidity = string.format('{"value": "%.2f"}', H)
-
     start_posting()
 end
 
@@ -58,7 +49,7 @@ function parse_data()
     H, T = bme280.humi()
     P, T = bme280.baro()
 
-    P = P/1000 -- Pressure in kPa
+    P = P*75/100000 -- Pressure in mmHg
     H = H/1000 -- Humidity in %
     T = T/100 -- Temperature in degrees C
     -- Register WiFi events
