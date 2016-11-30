@@ -1,7 +1,10 @@
 Instructions
 ------------
-*Before executing the instructions below, make sure you created an account on
-[**Ubidots**](http://www.ubidots.com) with three variables on it.*
+*this sketch is desined for sending bme280 sensor data to my local home server
+server receives data as get request having sensor id and value in it, like 
+http://192.168.8.1/rec.php?sid=3&value=11
+php gets the value and puts it in mysql database sensor history table
+*
 
 The BME280 is, by default, assumed to be connected this way: 
 
@@ -37,34 +40,17 @@ for more info.
 Edit the *init.lua* file with your details. To get the *temp_url*, *pres_url* and *humi_url* for
 your case, navigate to your Ubidots dashboard and click the **API credentials** button:
 
-![API Credentials button](https://i.imgur.com/aTj6vp0.png)
 
-Then copy your default Token from there:
-
-![Token](https://i.imgur.com/LepFlxl.png)
-
-You also need the **label** of your **variable source**:
-
-![Variable source](https://i.imgur.com/0fdP7lr.png)
-
-As well as the **label** of each variable:
-
-![Variable label](https://i.imgur.com/cOeCtJf.png)
-
-Now form the **URL** for each variable like this:
 
 <pre><code>
-<i>http://things.ubidots.com/api/1.6/devices/</i><b>device_label</b><i>/</i><b>variable_label</b><i>/values?token=</i><b>your_token</b>
+<i>http://192.168.8.1/rec.php?sid=</i><b>sensor_id</b><i>&value=</i><b>sensor_value</b
 </code></pre>
 
-Replace each URL in the *init.lua* file. For more details, see [**how to send data to Ubidots**](https://ubidots.com/docs/api/#send-values).
 
 
-**Finally**, using a tool like [**NodeMCU Uploader**](https://github.com/kmpm/nodemcu-uploader), 
-upload the *init.lua* file to the ESP8266 and then restart the device. 
+**Finally**, I use a tool named ESP8266Flasher to flash a firmware, and ESPLorer to 
+upload the *init.lua* file to the ESP8266. 
 
-```bash
-nodemcu-uploader upload init.lua
-```
 
-Your weather station should now work.
+
+My home server then can display graphs in browser.
